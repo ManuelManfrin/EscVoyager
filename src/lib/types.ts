@@ -1,7 +1,7 @@
 export interface Pratica {
   Esercizio: string | null
   'Nr Pratica': string | null
-  Anno: string | null
+  Anno: number | null
   'Data Inserimento': string | null
   Partenza: string | null
   Itinerario: string | null
