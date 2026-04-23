@@ -1,13 +1,15 @@
 import { useStore } from '@/lib/store'
 import { ChartCard } from './ChartCard'
-import { useMemo } from 'react'
-import { shortEse, fmt } from '@/lib/utils'
+import { useMemo, useState } from 'react'
+import { shortEse, fmt, fmtN } from '@/lib/utils'
 import type { Pratica } from '@/lib/types'
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   LineChart, Line,
+  LabelList,
 } from 'recharts'
+import { ArrowDownAZ, ArrowUpAZ } from 'lucide-react'
 
 const PALETTE = [
   '#2563EB', // blu
@@ -25,6 +27,46 @@ const PALETTE = [
 const TICK = { fontSize: 11 }
 const fmtTick = (v: unknown) => fmt(typeof v === 'number' ? v : 0)
 const fmtTip  = (v: unknown) => fmt(typeof v === 'number' ? v : 0)
+const truncateLabel = (value: string, max = 32) => value.length > max ? `${value.slice(0, max - 1)}…` : value
+function renderRightLabel(formatter?: (value: unknown) => string) {
+  function LabelBadge({
+    x,
+    y,
+    value,
+    fill = '#334155',
+  }: {
+    x: number
+    y: number
+    value: string
+    fill?: string
+  }) {
+    const width = Math.max(20, value.length * 6.5 + 10)
+    return (
+      <g transform={`translate(${x}, ${y})`}>
+        <rect
+          x={-width / 2}
+          y={-9}
+          width={width}
+          height={18}
+          rx={6}
+          fill="rgba(255,255,255,0.92)"
+          stroke="rgba(148,163,184,0.35)"
+        />
+        <text textAnchor="middle" dominantBaseline="middle" fill={fill} fontSize={11} fontWeight={600}>
+          {value}
+        </text>
+      </g>
+    )
+  }
+
+  return (props: { x?: number; y?: number; width?: number; height?: number; value?: unknown }) => {
+    const x = (props.x ?? 0) + (props.width ?? 0) + 18
+    const y = (props.y ?? 0) + (props.height ?? 0) / 2
+    const value = formatter ? formatter(props.value) : String(props.value ?? '')
+    if (!value) return null
+    return <LabelBadge x={x} y={y} value={value} />
+  }
+}
 
 function groupBy(data: Pratica[], field: keyof Pratica, valField: keyof Pratica) {
   const map: Record<string, number> = {}
@@ -106,7 +148,7 @@ export function MensileChart() {
           <Tooltip />
           <Legend iconSize={10} />
           {data.esercizi.map((e, i) => (
-            <Line key={e} type="monotone" dataKey={e} stroke={PALETTE[i]} dot={false} strokeWidth={2} />
+            <Line key={e} type="monotone" dataKey={e} stroke={PALETTE[i]} dot={{ r: 3 }} strokeWidth={2} />
           ))}
         </LineChart>
       </ResponsiveContainer>
@@ -117,6 +159,9 @@ export function MensileChart() {
 // ── Agenzie per Esercizio (Barre orizzontali, scrollabile) ───────────────────
 export function AgenzieYoYChart() {
   const { filtered } = useStore()
+  const [sortMetric, setSortMetric] = useState('__total')
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
+
   const { data, esercizi } = useMemo(() => {
     const rawEse = [...new Set(filtered.map(r => r.Esercizio).filter(Boolean) as string[])].sort()
     const esercizi = rawEse.map(shortEse)
@@ -139,17 +184,69 @@ export function AgenzieYoYChart() {
           _total: total,
         }
       })
-      .sort((a, b) => b._total - a._total)
+      .sort((a, b) => {
+        const aValue = sortMetric === '__total'
+          ? a._total
+          : Number(a[sortMetric as keyof typeof a] ?? 0)
+        const bValue = sortMetric === '__total'
+          ? b._total
+          : Number(b[sortMetric as keyof typeof b] ?? 0)
+
+        if (aValue === bValue) {
+          return a.name.localeCompare(b.name)
+        }
+
+        return sortDir === 'asc' ? aValue - bValue : bValue - aValue
+      })
       .map(({ _total, ...rest }) => rest)
 
     return { data, esercizi }
-  }, [filtered])
+  }, [filtered, sortDir, sortMetric])
 
   const rowH = esercizi.length * 20 + 10
   const chartH = data.length * rowH + 50
 
+  const headerControls = (
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <select
+        value={sortMetric}
+        onChange={e => setSortMetric(e.target.value)}
+        className="h-8 rounded-md border border-gray-200 bg-white px-2.5 text-sm text-gray-700 focus:border-gray-300 focus:outline-none"
+      >
+        <option value="__total">Aggregato</option>
+        {esercizi.map(e => (
+          <option key={e} value={e}>{e}</option>
+        ))}
+      </select>
+      <div className="inline-flex items-center rounded-md border border-gray-200 bg-white p-0.5">
+        <button
+          type="button"
+          onClick={() => setSortDir('desc')}
+          title="Ordine decrescente"
+          aria-label="Ordine decrescente"
+          className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${sortDir === 'desc' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          <ArrowDownAZ className="size-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setSortDir('asc')}
+          title="Ordine crescente"
+          aria-label="Ordine crescente"
+          className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${sortDir === 'asc' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          <ArrowUpAZ className="size-4" />
+        </button>
+      </div>
+    </div>
+  )
+
   return (
-    <ChartCard title="Confronto incasso agenzie per Esercizio" className="flex-1 flex flex-col min-h-0">
+    <ChartCard
+      title="Confronto incasso agenzie per Esercizio"
+      className="flex-1 flex flex-col min-h-0"
+      headerRight={headerControls}
+    >
       <div className="flex-1 min-h-0 overflow-y-auto">
         <ResponsiveContainer width="100%" height={chartH}>
           <BarChart data={data} layout="vertical" margin={{ left: 0, right: 16 }}>
@@ -159,7 +256,9 @@ export function AgenzieYoYChart() {
             <Tooltip formatter={fmtTip} />
             <Legend iconSize={10} />
             {esercizi.map((e, i) => (
-              <Bar key={e} dataKey={e} fill={PALETTE[i % PALETTE.length]} radius={[0, 2, 2, 0]} />
+              <Bar key={e} dataKey={e} fill={PALETTE[i % PALETTE.length]} radius={[0, 2, 2, 0]}>
+                <LabelList dataKey={e} content={renderRightLabel((v) => fmt(typeof v === 'number' ? v : 0))} />
+              </Bar>
             ))}
           </BarChart>
         </ResponsiveContainer>
@@ -174,17 +273,19 @@ export function AreaChart() {
   const data = useMemo(() => {
     const map = groupBy(filtered, 'Area geografica', 'Prezzo')
     return Object.entries(map).filter(([k]) => k !== '(vuoto)').sort((a,b)=>b[1]-a[1]).slice(0,12)
-      .map(([name, value]) => ({ name: name.length > 22 ? name.slice(0,20)+'…' : name, value }))
+      .map(([name, value]) => ({ name, shortName: truncateLabel(name), value }))
   }, [filtered])
   return (
     <ChartCard title="Prezzo per area geografica">
-      <ResponsiveContainer width="100%" height={240}>
-        <BarChart data={data} layout="vertical" margin={{ right: 16 }}>
+      <ResponsiveContainer width="100%" height={320}>
+        <BarChart data={data} layout="vertical" margin={{ right: 16 }} barCategoryGap="18%">
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
           <XAxis type="number" tick={TICK} tickFormatter={fmtTick} />
-          <YAxis type="category" dataKey="name" tick={TICK} width={130} />
+          <YAxis type="category" dataKey="shortName" tick={TICK} width={220} />
           <Tooltip formatter={fmtTip} />
-          <Bar dataKey="value" fill="#2563EB" radius={[0,2,2,0]} />
+          <Bar dataKey="value" fill="#2563EB" radius={[0,2,2,0]} barSize={18}>
+            <LabelList dataKey="value" content={renderRightLabel((v) => fmt(typeof v === 'number' ? v : 0))} />
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>
@@ -195,25 +296,63 @@ export function AreaChart() {
 export function NazioniChart() {
   const { filtered } = useStore()
   const data = useMemo(() => {
-    const map: Record<string, {sum:number,count:number}> = {}
+    const map: Record<string, {sum:number,count:number,min:number,max:number}> = {}
     filtered.forEach(r => {
       const k = r.Nazioni; if (!k || k === '(vuoto)') return
-      if (!map[k]) map[k] = { sum: 0, count: 0 }
-      map[k].sum += r.Prezzo || 0; map[k].count++
+      const prezzo = r.Prezzo || 0
+      if (!map[k]) map[k] = { sum: 0, count: 0, min: prezzo, max: prezzo }
+      map[k].sum += prezzo
+      map[k].count++
+      map[k].min = Math.min(map[k].min, prezzo)
+      map[k].max = Math.max(map[k].max, prezzo)
     })
     return Object.entries(map)
-      .map(([name, v]) => ({ name, 'Prezzo medio': v.count ? Math.round(v.sum/v.count) : 0 }))
+      .map(([name, v]) => ({
+        name,
+        shortName: `${truncateLabel(name, 24)} (${v.count})`,
+        'Prezzo medio': v.count ? Math.round(v.sum/v.count) : 0,
+        occorrenze: v.count,
+        min: v.min,
+        max: v.max,
+        rangeBase: v.min,
+        rangeSpan: Math.max(0, v.max - v.min),
+      }))
       .sort((a,b) => b['Prezzo medio'] - a['Prezzo medio']).slice(0,15)
   }, [filtered])
   return (
     <ChartCard title="Top 15 nazioni – prezzo medio pratica">
-      <ResponsiveContainer width="100%" height={280}>
-        <BarChart data={data} layout="vertical" margin={{ right: 16 }}>
+      <ResponsiveContainer width="100%" height={360}>
+        <BarChart data={data} layout="vertical" margin={{ right: 16 }} barCategoryGap="18%">
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
           <XAxis type="number" tick={TICK} tickFormatter={fmtTick} />
-          <YAxis type="category" dataKey="name" tick={TICK} width={110} />
-          <Tooltip formatter={fmtTip} />
-          <Bar dataKey="Prezzo medio" fill="#0891B2" radius={[0,2,2,0]} />
+          <YAxis type="category" dataKey="shortName" tick={TICK} width={220} />
+          <Tooltip
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null
+              const row = payload[0].payload as {
+                name: string
+                'Prezzo medio': number
+                occorrenze: number
+                min: number
+                max: number
+              }
+
+              return (
+                <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-lg">
+                  <div className="font-semibold text-gray-900">{row.name}</div>
+                  <div className="mt-1 text-gray-600">Prezzo medio: <span className="font-medium text-gray-900">{fmt(row['Prezzo medio'])}</span></div>
+                  <div className="text-gray-600">Occorrenze: <span className="font-medium text-gray-900">{fmtN(row.occorrenze)}</span></div>
+                  <div className="text-gray-600">Min: <span className="font-medium text-gray-900">{fmt(row.min)}</span></div>
+                  <div className="text-gray-600">Max: <span className="font-medium text-gray-900">{fmt(row.max)}</span></div>
+                </div>
+              )
+            }}
+          />
+          <Bar dataKey="rangeBase" stackId="range" fill="transparent" isAnimationActive={false} />
+          <Bar dataKey="rangeSpan" stackId="range" fill="#0891B2" fillOpacity={0.18} radius={[0,2,2,0]} barSize={10} isAnimationActive={false} />
+          <Bar dataKey="Prezzo medio" fill="#0891B2" radius={[0,2,2,0]} barSize={18}>
+            <LabelList dataKey="Prezzo medio" content={renderRightLabel((v) => fmt(typeof v === 'number' ? v : 0))} />
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>

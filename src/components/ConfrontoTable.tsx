@@ -1,34 +1,59 @@
 import { useStore } from '@/lib/store'
-import { fmtEur, shortEse, getYoYPair } from '@/lib/utils'
-import { useState, useMemo } from 'react'
+import { compareEsercizi, fmtEur, shortEse } from '@/lib/utils'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 
 type SortDir = 1 | -1
-type SortField = 'agenzia' | 'incPrev' | 'incCurr' | 'delta' | 'deltapct' | 'npratiche'
+type SortField = 'agenzia' | 'incA' | 'incB' | 'delta' | 'deltapct' | 'npratiche'
 
 export function ConfrontoTable() {
   const { filtered } = useStore()
-  const [sortField, setSortField] = useState<SortField>('incCurr')
+  const [sortField, setSortField] = useState<SortField>('incB')
   const [sortDir, setSortDir]     = useState<SortDir>(-1)
   const [search, setSearch]       = useState('')
+  const [periodA, setPeriodA]     = useState('')
+  const [periodB, setPeriodB]     = useState('')
 
-  const { rows, prevLabel, currLabel } = useMemo(() => {
-    const esercizi = [...new Set(filtered.map(r => r.Esercizio).filter(Boolean) as string[])].sort()
-    const [prev, curr] = getYoYPair(esercizi)
+  const esercizi = useMemo(
+    () => [...new Set(filtered.map(r => r.Esercizio).filter(Boolean) as string[])].sort(),
+    [filtered]
+  )
+
+  useEffect(() => {
+    const fallbackA = esercizi.length > 1 ? esercizi[esercizi.length - 2] : (esercizi[0] ?? '')
+    const fallbackB = esercizi[esercizi.length - 1] ?? ''
+
+    setPeriodA(current => esercizi.includes(current) ? current : fallbackA)
+    setPeriodB(current => esercizi.includes(current) ? current : fallbackB)
+  }, [esercizi])
+
+  useEffect(() => {
+    if (!periodA || !periodB) return
+    if (compareEsercizi(periodA, periodB) <= 0) return
+
+    setPeriodA(periodB)
+    setPeriodB(periodA)
+  }, [periodA, periodB])
+
+  const { rows, periodALabel, periodBLabel } = useMemo(() => {
     const agenzie = [...new Set(filtered.map(r => r['Agenzia Viaggi']).filter(Boolean) as string[])]
 
     const rows = agenzie.map(a => {
-      const dPrev = prev ? filtered.filter(r => r['Agenzia Viaggi'] === a && r.Esercizio === prev) : []
-      const dCurr = curr ? filtered.filter(r => r['Agenzia Viaggi'] === a && r.Esercizio === curr) : []
-      const incPrev = dPrev.reduce((s, r) => s + (r.Incasso || 0), 0)
-      const incCurr = dCurr.reduce((s, r) => s + (r.Incasso || 0), 0)
-      const delta = incCurr - incPrev
-      const deltapct = incPrev > 0 ? delta / incPrev * 100 : null
+      const dA = periodA ? filtered.filter(r => r['Agenzia Viaggi'] === a && r.Esercizio === periodA) : []
+      const dB = periodB ? filtered.filter(r => r['Agenzia Viaggi'] === a && r.Esercizio === periodB) : []
+      const incA = dA.reduce((s, r) => s + (r.Incasso || 0), 0)
+      const incB = dB.reduce((s, r) => s + (r.Incasso || 0), 0)
+      const delta = incB - incA
+      const deltapct = incA > 0 ? delta / incA * 100 : null
       const npratiche = filtered.filter(r => r['Agenzia Viaggi'] === a).length
-      return { agenzia: a, incPrev, incCurr, delta, deltapct, npratiche }
+      return { agenzia: a, incA, incB, delta, deltapct, npratiche }
     })
-    return { rows, prevLabel: shortEse(prev), currLabel: shortEse(curr) }
-  }, [filtered])
+    return {
+      rows,
+      periodALabel: shortEse(periodA || null),
+      periodBLabel: shortEse(periodB || null),
+    }
+  }, [filtered, periodA, periodB])
 
   const filtered2 = useMemo(() => {
     const s = search.toLowerCase()
@@ -60,10 +85,40 @@ export function ConfrontoTable() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3.5 border-b border-gray-100 flex items-center gap-3">
+      <div className="px-4 py-3.5 border-b border-gray-100 flex items-center gap-3 flex-wrap">
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Cerca agenzia…"
           className="w-72 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors" />
+        <select
+          value={periodA}
+          onChange={e => {
+            const next = e.target.value
+            if (periodB && compareEsercizi(next, periodB) > 0) {
+              setPeriodA(periodB)
+              setPeriodB(next)
+              return
+            }
+            setPeriodA(next)
+          }}
+          className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-blue-500 transition-colors"
+        >
+          {esercizi.map(e => <option key={e} value={e}>Periodo A · {shortEse(e)}</option>)}
+        </select>
+        <select
+          value={periodB}
+          onChange={e => {
+            const next = e.target.value
+            if (periodA && compareEsercizi(periodA, next) > 0) {
+              setPeriodB(periodA)
+              setPeriodA(next)
+              return
+            }
+            setPeriodB(next)
+          }}
+          className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-blue-500 transition-colors"
+        >
+          {esercizi.map(e => <option key={e} value={e}>Periodo B · {shortEse(e)}</option>)}
+        </select>
         <span className="text-sm text-gray-400">{sorted.length} agenzie</span>
       </div>
       <div className="flex-1 overflow-auto">
@@ -71,8 +126,8 @@ export function ConfrontoTable() {
           <thead className="bg-[#1F4E79] text-white sticky top-0 z-10">
             <tr>
               <Th field="agenzia"   label="Agenzia" />
-              <Th field="incPrev"   label={`Incasso ${prevLabel}`} />
-              <Th field="incCurr"   label={`Incasso ${currLabel}`} />
+              <Th field="incA"      label={`Incasso ${periodALabel}`} />
+              <Th field="incB"      label={`Incasso ${periodBLabel}`} />
               <Th field="delta"     label="Δ Assoluto" />
               <Th field="deltapct"  label="Δ %" />
               <Th field="npratiche" label="N° Pratiche" />
@@ -85,8 +140,8 @@ export function ConfrontoTable() {
               return (
                 <tr key={r.agenzia} className={i % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/60 hover:bg-slate-100/60'}>
                   <td className="px-4 py-2.5 font-medium max-w-[200px] truncate">{r.agenzia}</td>
-                  <td className="px-4 py-2.5 text-right">{fmtEur(r.incPrev)}</td>
-                  <td className="px-4 py-2.5 text-right font-semibold">{fmtEur(r.incCurr)}</td>
+                  <td className="px-4 py-2.5 text-right">{fmtEur(r.incA)}</td>
+                  <td className="px-4 py-2.5 text-right font-semibold">{fmtEur(r.incB)}</td>
                   <td className={`px-4 py-2.5 text-right ${dCls}`}>{r.delta >= 0 ? '+' : ''}{fmtEur(r.delta)}</td>
                   <td className={`px-4 py-2.5 text-right ${dCls}`}>{pct}</td>
                   <td className="px-4 py-2.5 text-right text-gray-500">{r.npratiche}</td>

@@ -1,13 +1,10 @@
 import { useStore } from '@/lib/store'
-import { Card, CardContent } from '@/components/ui/card'
 import { fmt, fmtN } from '@/lib/utils'
 import { useMemo } from 'react'
 import { TrendingUp, Wallet, AlertTriangle, FileText, Banknote } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface KPICardsProps { collapsed?: boolean }
-
-export function KPICards({ collapsed = false }: KPICardsProps) {
+export function KPICards() {
   const { filtered } = useStore()
 
   const kpi = useMemo(() => {
@@ -30,43 +27,21 @@ export function KPICards({ collapsed = false }: KPICardsProps) {
   ]
 
   return (
-    <div className={cn(
-      'relative overflow-hidden bg-white border-b border-gray-200/80 transition-[height] duration-300 ease-in-out shrink-0',
-      collapsed ? 'h-[48px]' : 'h-[88px]'
-    )}>
-      {/* ── Mini badges (visibili quando collapsed) ── */}
-      <div className={cn(
-        'absolute inset-0 flex items-center gap-2.5 px-5 transition-all duration-300',
-        collapsed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
-      )}>
-        {cards.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} title={label}
-            className={cn('flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-semibold', bg, color)}>
-            <Icon className="w-3.5 h-3.5 shrink-0" />
-            <span>{value}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Full cards (visibili quando non collapsed) ── */}
-      <div className={cn(
-        'absolute inset-0 grid grid-cols-5 gap-3 px-5 py-3 transition-all duration-300',
-        collapsed ? 'opacity-0 -translate-y-1 pointer-events-none' : 'opacity-100 translate-y-0'
-      )}>
-        {cards.map(({ label, value, icon: Icon, color, bg }) => (
-          <Card key={label}>
-            <CardContent className="p-3.5 flex items-center gap-3">
-              <div className={cn(bg, color, 'p-2 rounded-lg shrink-0')}>
-                <Icon className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide truncate">{label}</p>
-                <p className="text-base font-bold text-gray-900 mt-1">{value}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+    <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden">
+      {cards.map(({ label, value, icon: Icon, color, bg }) => (
+        <div
+          key={label}
+          title={label}
+          className={cn(
+            'flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold',
+            bg,
+            color
+          )}
+        >
+          <Icon className="h-3.5 w-3.5 shrink-0" />
+          <span className="whitespace-nowrap">{value}</span>
+        </div>
+      ))}
     </div>
   )
 }

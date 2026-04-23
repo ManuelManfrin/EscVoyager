@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useStore } from '@/lib/store'
 import { Header } from '@/components/Header'
 import { Sidebar } from '@/components/Sidebar'
 import { ImportScreen } from '@/components/ImportScreen'
 import { KPICards } from '@/components/KPICards'
+import { AgenzieDashboard } from '@/components/AgenzieDashboard'
 import { DataTable } from '@/components/DataTable'
 import { ConfrontoTable } from '@/components/ConfrontoTable'
 import { AnomalieTab } from '@/components/AnomalieTab'
 import {
-  StatoChart, MacroChart, MensileChart, AgenzieYoYChart,
+  StatoChart, MacroChart, MensileChart,
   AreaChart, NazioniChart, CanaleChart,
 } from '@/components/charts'
 import { cn } from '@/lib/utils'
@@ -19,21 +20,23 @@ const TABS = [
   { id: 'destinazioni',label: 'Destinazioni' },
   { id: 'anomalie',    label: 'Anomalie' },
   { id: 'tabella',     label: 'Dettaglio pratiche' },
-  { id: 'confronto',   label: 'Confronto YoY' },
+  { id: 'confronto',   label: 'Confronto esercizi' },
 ]
 
 export default function App() {
   const { allData } = useStore()
   const [showImport, setShowImport] = useState(!allData.length)
   const [activeTab, setActiveTab]   = useState('overview')
-  const [kpiCollapsed, setKpiCollapsed] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const hasData = allData.length > 0
-
-  useEffect(() => { setKpiCollapsed(false) }, [activeTab])
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <Header onImport={() => setShowImport(true)} />
+      <Header
+        onImport={() => setShowImport(true)}
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen(open => !open)}
+      />
 
       {(!hasData || showImport) && (
         <ImportScreen
@@ -44,34 +47,41 @@ export default function App() {
 
       {hasData && (
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
+          {sidebarOpen && <Sidebar />}
 
           <main className="flex-1 flex flex-col overflow-hidden bg-[#f8fafc]">
-            <KPICards collapsed={kpiCollapsed} />
-
             {/* Tab nav */}
-            <div className="px-5 border-b border-gray-200 bg-white flex shrink-0">
-              {TABS.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    'px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors',
-                    activeTab === tab.id
-                      ? 'border-[#2563EB] text-[#2563EB]'
-                      : 'border-transparent text-gray-400 hover:text-gray-600'
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            <div className="border-b border-gray-200 bg-white shrink-0">
+              <div className="flex h-12 items-stretch justify-between gap-4 overflow-hidden px-5">
+                <div className="flex min-w-0 overflow-x-auto overflow-y-hidden">
+                  {TABS.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={cn(
+                        'shrink-0 px-5 text-sm font-medium border-b-2 transition-colors',
+                        activeTab === tab.id
+                          ? 'border-[#2563EB] text-[#2563EB]'
+                          : 'border-transparent text-gray-400 hover:text-gray-600'
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="hidden xl:flex shrink-0 items-center overflow-x-auto overflow-y-hidden">
+                  <KPICards />
+                </div>
+              </div>
+
+              <div className="xl:hidden overflow-x-auto overflow-y-hidden px-5 py-2 border-t border-gray-100">
+                <KPICards />
+              </div>
             </div>
 
             {/* Tab content */}
-            <div
-              className="flex-1 overflow-auto p-6"
-              onScroll={e => setKpiCollapsed(e.currentTarget.scrollTop > 40)}
-            >
+            <div className="flex-1 overflow-auto p-6">
               {activeTab === 'overview' && (
                 <div className="grid grid-cols-2 gap-5">
                   <StatoChart />
@@ -82,11 +92,11 @@ export default function App() {
               )}
               {activeTab === 'agenzie' && (
                 <div className="h-full flex flex-col min-h-0">
-                  <AgenzieYoYChart />
+                  <AgenzieDashboard />
                 </div>
               )}
               {activeTab === 'destinazioni' && (
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 gap-5">
                   <AreaChart />
                   <NazioniChart />
                 </div>
