@@ -54,7 +54,7 @@ export const useStore = create<AppState>()(
         set({ allData: [], filtered: [], filters: EMPTY_FILTERS }),
     }),
     {
-      name: 'kel12-dashboard-v4',
+      name: 'escvoyager-dashboard-v4',
       partialize: (state) => ({ allData: state.allData }),
       onRehydrateStorage: () => (state) => {
         if (state && state.allData?.length) {

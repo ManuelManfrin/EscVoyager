@@ -85,7 +85,7 @@ export function ImportScreen({ onClose, fromDashboard = false }: ImportScreenPro
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4">
         <div className="p-6 border-b border-gray-100 flex items-start justify-between">
           <div>
-            <div className="text-lg font-bold text-[#1F4E79]">KEL 12</div>
+            <div className="text-lg font-bold text-[#1F4E79]">EscVoyager</div>
             <h2 className="text-base font-bold text-gray-800 mt-0.5">Dashboard Pratiche</h2>
             <p className="text-xs text-gray-500 mt-1">
               Carica file <strong>KLSGP (.xls / .xlsx)</strong> oppure il database salvato (.json)
