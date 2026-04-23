@@ -25,7 +25,7 @@ export function Header({ onImport }: HeaderProps) {
     <header className="bg-[#1F4E79] text-white px-4 py-2.5 flex items-center justify-between shrink-0 shadow-md">
       <div className="flex items-center gap-2.5">
         <LayoutDashboard className="w-5 h-5 text-[#9DC3E6]" />
-        <span className="font-bold text-sm tracking-wide">KEL 12 – Dashboard Pratiche</span>
+        <span className="font-bold text-sm tracking-wide">EscVoyager – Dashboard Pratiche</span>
       </div>
 
       <div className="flex items-center gap-2">
