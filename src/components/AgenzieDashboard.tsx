@@ -33,8 +33,8 @@ const MONTH_INDEX: Record<string, number> = { '10': 0, '11': 1, '12': 2, '01': 3
 const PALETTE = ['#2563EB', '#DC2626', '#16A34A', '#D97706', '#7C3AED', '#0891B2', '#DB2777', '#65A30D']
 const CONFIRMED_STATI = ['Confermata definitiva', 'Confermata con servizi su richiesta']
 const TICK = { fontSize: 11 }
-const fmtTip = (v: unknown) => typeof v === 'number' ? fmtEur(v) : v
-const fmtCountTip = (v: unknown) => typeof v === 'number' ? fmtN(v) : v
+const fmtTip = (v: unknown): string => typeof v === 'number' ? fmtEur(v) : String(v ?? '')
+const fmtCountTip = (v: unknown): string => typeof v === 'number' ? fmtN(v) : String(v ?? '')
 
 type Row = Record<string, string | number>
 
@@ -77,9 +77,9 @@ function LabelBadge({
 }
 
 function renderTopLabel(formatter?: (value: unknown) => string) {
-  return (props: { x?: number; y?: number; width?: number; value?: unknown }) => {
-    const x = (props.x ?? 0) + (props.width ?? 0) / 2
-    const y = (props.y ?? 0) - 8
+  return (props: { x?: string | number; y?: string | number; width?: string | number; value?: unknown }) => {
+    const x = Number(props.x ?? 0) + Number(props.width ?? 0) / 2
+    const y = Number(props.y ?? 0) - 8
     const value = formatter ? formatter(props.value) : String(props.value ?? '')
     if (!value) return null
     return <LabelBadge x={x} y={y} value={value} />
@@ -87,9 +87,9 @@ function renderTopLabel(formatter?: (value: unknown) => string) {
 }
 
 function renderRightLabel(formatter?: (value: unknown) => string) {
-  return (props: { x?: number; y?: number; width?: number; height?: number; value?: unknown }) => {
-    const x = (props.x ?? 0) + (props.width ?? 0) + 18
-    const y = (props.y ?? 0) + (props.height ?? 0) / 2
+  return (props: { x?: string | number; y?: string | number; width?: string | number; height?: string | number; value?: unknown }) => {
+    const x = Number(props.x ?? 0) + Number(props.width ?? 0) + 18
+    const y = Number(props.y ?? 0) + Number(props.height ?? 0) / 2
     const value = formatter ? formatter(props.value) : String(props.value ?? '')
     if (!value) return null
     return <LabelBadge x={x} y={y} value={value} />

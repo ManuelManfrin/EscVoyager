@@ -26,7 +26,7 @@ const PALETTE = [
 
 const TICK = { fontSize: 11 }
 const fmtTick = (v: unknown) => fmt(typeof v === 'number' ? v : 0)
-const fmtTip  = (v: unknown) => fmt(typeof v === 'number' ? v : 0)
+const fmtTip  = (v: unknown): string => fmt(typeof v === 'number' ? v : 0)
 const truncateLabel = (value: string, max = 32) => value.length > max ? `${value.slice(0, max - 1)}…` : value
 function renderRightLabel(formatter?: (value: unknown) => string) {
   function LabelBadge({
@@ -59,9 +59,9 @@ function renderRightLabel(formatter?: (value: unknown) => string) {
     )
   }
 
-  return (props: { x?: number; y?: number; width?: number; height?: number; value?: unknown }) => {
-    const x = (props.x ?? 0) + (props.width ?? 0) + 18
-    const y = (props.y ?? 0) + (props.height ?? 0) / 2
+  return (props: { x?: string | number; y?: string | number; width?: string | number; height?: string | number; value?: unknown }) => {
+    const x = Number(props.x ?? 0) + Number(props.width ?? 0) + 18
+    const y = Number(props.y ?? 0) + Number(props.height ?? 0) / 2
     const value = formatter ? formatter(props.value) : String(props.value ?? '')
     if (!value) return null
     return <LabelBadge x={x} y={y} value={value} />
