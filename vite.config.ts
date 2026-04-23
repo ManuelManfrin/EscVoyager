@@ -5,7 +5,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/KEL12-Dashboard/',   // nome repo GitHub — aggiorna se necessario
+  base: '/KEL12_Dashboard/',
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
   },
