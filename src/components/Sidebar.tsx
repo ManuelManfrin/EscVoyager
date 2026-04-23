@@ -27,31 +27,31 @@ export function Sidebar() {
   }), [allData])
 
   const section = (title: string) => (
-    <div className="text-[10px] font-bold uppercase tracking-widest text-[#9DC3E6] mt-4 mb-1.5 px-1">{title}</div>
+    <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mt-6 mb-2.5 px-1">{title}</div>
   )
   const group = (label: string, children: React.ReactNode) => (
-    <div className="mb-2">
-      <label className="block text-[11px] text-gray-400 mb-1 px-1">{label}</label>
+    <div className="mb-4">
+      <label className="block text-xs font-medium text-gray-500 mb-1.5 px-1">{label}</label>
       {children}
     </div>
   )
 
   return (
-    <aside className="w-[220px] shrink-0 bg-white border-r border-gray-100 flex flex-col overflow-y-auto">
-      <div className="p-3 flex-1">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-gray-700">Filtri</span>
-          <Button variant="ghost" size="sm" onClick={resetFilters} className="!px-2 !py-1 text-[11px]">
-            <RotateCcw className="w-3 h-3" /> Reset
+    <aside className="w-[248px] shrink-0 bg-white border-r border-gray-200/80 flex flex-col overflow-y-auto">
+      <div className="p-4 flex-1">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm font-semibold text-gray-700">Filtri</span>
+          <Button variant="ghost" size="sm" onClick={resetFilters} className="!px-2.5 !py-1.5 text-xs">
+            <RotateCcw className="w-3.5 h-3.5" /> Reset
           </Button>
         </div>
 
         {section('Periodo')}
         {group('Esercizio', <MultiSelect options={opts.esercizi} value={filters.esercizi} onChange={v => setFilters({ esercizi: v })} />)}
         {group('Data dal', <input type="date" value={filters.dateFrom} onChange={e => setFilters({ dateFrom: e.target.value })}
-          className="w-full border border-gray-200 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500" />)}
+          className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" />)}
         {group('Data al', <input type="date" value={filters.dateTo} onChange={e => setFilters({ dateTo: e.target.value })}
-          className="w-full border border-gray-200 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500" />)}
+          className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" />)}
 
         {section('Pratica')}
         {group('Classificazione', <MultiSelect options={opts.classificazioni} value={filters.classificazioni} onChange={v => setFilters({ classificazioni: v })} />)}

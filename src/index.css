@@ -3,17 +3,25 @@
 @layer base {
   :root {
     --blue-dark: #1F4E79;
-    --blue-mid:  #2E75B6;
+    --blue-mid:  #2563EB;
     --blue-light:#5BA3D9;
-    --blue-pale: #9DC3E6;
-    --blue-bg:   #EBF3FB;
+    --blue-pale: #93C5FD;
+    --blue-bg:   #EFF6FF;
+
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --border: #e2e8f0;
+    --ring: #2563EB;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
-    background: #f0f4f8;
-    color: #1a1a2e;
+    font-size: 14px;
+    background: #f8fafc;
+    color: #0f172a;
+    line-height: 1.5;
   }
   #root { height: 100vh; display: flex; flex-direction: column; }
 }

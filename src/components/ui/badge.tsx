@@ -7,7 +7,7 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 export function Badge({ variant = 'default', className, ...props }: BadgeProps) {
   return (
     <span className={cn(
-      'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold',
+      'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap',
       variant === 'default' && 'bg-blue-100 text-blue-800',
       variant === 'success' && 'bg-green-100 text-green-800',
       variant === 'warning' && 'bg-yellow-100 text-yellow-800',

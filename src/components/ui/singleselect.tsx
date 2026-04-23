@@ -14,7 +14,7 @@ export function SingleSelect({ options, value, onChange, placeholder = '— Tutt
       value={value}
       onChange={e => onChange(e.target.value)}
       className={cn(
-        'w-full bg-white border border-gray-200 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500',
+        'w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors',
         !value && 'text-gray-400',
         className
       )}

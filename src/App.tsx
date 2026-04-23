@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '@/lib/store'
 import { Header } from '@/components/Header'
 import { Sidebar } from '@/components/Sidebar'
@@ -6,6 +6,7 @@ import { ImportScreen } from '@/components/ImportScreen'
 import { KPICards } from '@/components/KPICards'
 import { DataTable } from '@/components/DataTable'
 import { ConfrontoTable } from '@/components/ConfrontoTable'
+import { AnomalieTab } from '@/components/AnomalieTab'
 import {
   StatoChart, MacroChart, MensileChart, AgenzieYoYChart,
   AreaChart, NazioniChart, CanaleChart,
@@ -16,6 +17,7 @@ const TABS = [
   { id: 'overview',    label: 'Overview' },
   { id: 'agenzie',     label: 'Agenzie' },
   { id: 'destinazioni',label: 'Destinazioni' },
+  { id: 'anomalie',    label: 'Anomalie' },
   { id: 'tabella',     label: 'Dettaglio pratiche' },
   { id: 'confronto',   label: 'Confronto YoY' },
 ]
@@ -24,7 +26,10 @@ export default function App() {
   const { allData } = useStore()
   const [showImport, setShowImport] = useState(!allData.length)
   const [activeTab, setActiveTab]   = useState('overview')
+  const [kpiCollapsed, setKpiCollapsed] = useState(false)
   const hasData = allData.length > 0
+
+  useEffect(() => { setKpiCollapsed(false) }, [activeTab])
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -41,20 +46,20 @@ export default function App() {
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
 
-          <main className="flex-1 flex flex-col overflow-hidden bg-[#f0f4f8]">
-            <KPICards />
+          <main className="flex-1 flex flex-col overflow-hidden bg-[#f8fafc]">
+            <KPICards collapsed={kpiCollapsed} />
 
             {/* Tab nav */}
-            <div className="px-4 border-b border-gray-200 bg-white flex gap-0 shrink-0">
+            <div className="px-5 border-b border-gray-200 bg-white flex shrink-0">
               {TABS.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    'px-4 py-2.5 text-xs font-semibold border-b-2 -mb-px transition-colors',
+                    'px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors',
                     activeTab === tab.id
-                      ? 'border-[#1F4E79] text-[#1F4E79]'
-                      : 'border-transparent text-gray-400 hover:text-gray-700'
+                      ? 'border-[#2563EB] text-[#2563EB]'
+                      : 'border-transparent text-gray-400 hover:text-gray-600'
                   )}
                 >
                   {tab.label}
@@ -63,9 +68,12 @@ export default function App() {
             </div>
 
             {/* Tab content */}
-            <div className="flex-1 overflow-auto p-4">
+            <div
+              className="flex-1 overflow-auto p-6"
+              onScroll={e => setKpiCollapsed(e.currentTarget.scrollTop > 40)}
+            >
               {activeTab === 'overview' && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <StatoChart />
                   <MacroChart />
                   <MensileChart />
@@ -73,23 +81,24 @@ export default function App() {
                 </div>
               )}
               {activeTab === 'agenzie' && (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="h-full flex flex-col min-h-0">
                   <AgenzieYoYChart />
                 </div>
               )}
               {activeTab === 'destinazioni' && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <AreaChart />
                   <NazioniChart />
                 </div>
               )}
+              {activeTab === 'anomalie' && <AnomalieTab />}
               {activeTab === 'tabella' && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 h-full flex flex-col">
+                <div className="bg-white rounded-xl border border-gray-200/80 h-full flex flex-col">
                   <DataTable />
                 </div>
               )}
               {activeTab === 'confronto' && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 h-full flex flex-col">
+                <div className="bg-white rounded-xl border border-gray-200/80 h-full flex flex-col">
                   <ConfrontoTable />
                 </div>
               )}

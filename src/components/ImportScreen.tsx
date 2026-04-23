@@ -86,8 +86,8 @@ export function ImportScreen({ onClose, fromDashboard = false }: ImportScreenPro
         <div className="p-6 border-b border-gray-100 flex items-start justify-between">
           <div>
             <div className="text-lg font-bold text-[#1F4E79]">EscVoyager</div>
-            <h2 className="text-base font-bold text-gray-800 mt-0.5">Dashboard Pratiche</h2>
-            <p className="text-xs text-gray-500 mt-1">
+            <h2 className="text-base font-semibold text-gray-800 mt-1">Dashboard Pratiche</h2>
+            <p className="text-sm text-gray-500 mt-1.5">
               Carica file <strong>KLSGP (.xls / .xlsx)</strong> oppure il database salvato (.json)
             </p>
           </div>
@@ -108,9 +108,9 @@ export function ImportScreen({ onClose, fromDashboard = false }: ImportScreenPro
             className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors
               ${dragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
           >
-            <Upload className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <Upload className="w-8 h-8 text-gray-300 mx-auto mb-3" />
             <p className="text-sm text-gray-500">Trascina i file qui</p>
-            <p className="text-xs text-gray-400 mt-1">oppure clicca · .xls .xlsx .json</p>
+            <p className="text-sm text-gray-400 mt-1">oppure clicca · .xls .xlsx .json</p>
           </div>
           <input
             id="file-input-react"
@@ -123,9 +123,9 @@ export function ImportScreen({ onClose, fromDashboard = false }: ImportScreenPro
 
           {/* File list */}
           {files.length > 0 && (
-            <div className="space-y-1.5">
+            <div className="space-y-2.5">
               {files.map(entry => (
-                <div key={entry.file.name} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs
+                <div key={entry.file.name} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm
                   ${entry.status === 'error' ? 'bg-red-50' : entry.status === 'ok' ? 'bg-green-50' : 'bg-gray-50'}`}>
                   {entry.type === 'json'
                     ? <FileJson className="w-4 h-4 text-green-600 shrink-0" />
@@ -144,14 +144,14 @@ export function ImportScreen({ onClose, fromDashboard = false }: ImportScreenPro
             </div>
           )}
 
-          {progress && <p className="text-xs text-gray-500 text-center">{progress}</p>}
+          {progress && <p className="text-sm text-gray-500 text-center">{progress}</p>}
 
           <Button
             className="w-full"
             disabled={files.length === 0 || loading}
             onClick={run}
           >
-            <Play className="w-3.5 h-3.5" />
+            <Play className="w-4 h-4" />
             {loading ? 'Elaborazione…' : 'Avvia analisi'}
           </Button>
         </div>

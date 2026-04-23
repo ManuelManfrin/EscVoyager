@@ -22,34 +22,34 @@ export function Header({ onImport }: HeaderProps) {
   }, [allData, hasData])
 
   return (
-    <header className="bg-[#1F4E79] text-white px-4 py-2.5 flex items-center justify-between shrink-0 shadow-md">
-      <div className="flex items-center gap-2.5">
-        <LayoutDashboard className="w-5 h-5 text-[#9DC3E6]" />
-        <span className="font-bold text-sm tracking-wide">EscVoyager – Dashboard Pratiche</span>
+    <header className="bg-[#1F4E79] text-white px-5 py-3.5 flex items-center justify-between shrink-0 shadow-md">
+      <div className="flex items-center gap-3">
+        <LayoutDashboard className="w-5 h-5 text-[#93C5FD]" />
+        <span className="font-semibold text-base tracking-wide">EscVoyager – Dashboard Pratiche</span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         {hasData && (
-          <span className="text-[#9DC3E6] text-xs mr-2">
+          <span className="text-[#93C5FD] text-sm mr-3">
             {allData.length.toLocaleString('it')} pratiche
             {lastDate && <> · aggiornato al {lastDate}</>}
           </span>
         )}
 
         <Button variant="ghost" size="sm" onClick={onImport}>
-          <Upload className="w-3.5 h-3.5" /> Importa dati
+          <Upload className="w-4 h-4" /> Importa dati
         </Button>
 
         {hasData && (
           <>
             <Button variant="success" size="sm" onClick={() => saveJSON(allData)}>
-              <Save className="w-3.5 h-3.5" /> Salva database
+              <Save className="w-4 h-4" /> Salva database
             </Button>
             <Button variant="secondary" size="sm" onClick={() => saveCSV(filtered)}>
-              <FileDown className="w-3.5 h-3.5" /> Export CSV
+              <FileDown className="w-4 h-4" /> Export CSV
             </Button>
             <Button variant="ghost" size="sm" onClick={() => { if (confirm('Rimuovere tutti i dati salvati?')) clearData() }}>
-              <Trash2 className="w-3.5 h-3.5" /> Rimuovi dati
+              <Trash2 className="w-4 h-4" /> Rimuovi dati
             </Button>
           </>
         )}

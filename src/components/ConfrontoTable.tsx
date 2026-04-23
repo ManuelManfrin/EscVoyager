@@ -47,27 +47,27 @@ export function ConfrontoTable() {
   }
 
   const Th = ({ field, label }: { field: SortField; label: string }) => (
-    <th className="text-left px-3 py-2 font-semibold cursor-pointer whitespace-nowrap hover:bg-[#1a3f63]"
+    <th className="text-left px-4 py-3 font-semibold cursor-pointer whitespace-nowrap hover:bg-[#1a3f63]"
         onClick={() => sort(field)}>
-      <span className="flex items-center gap-1">
+      <span className="flex items-center gap-1.5">
         {label}
         {sortField === field
-          ? sortDir === 1 ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-          : <span className="text-[#9DC3E6]/40">⇅</span>}
+          ? sortDir === 1 ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />
+          : <span className="text-[#93C5FD]/40">⇅</span>}
       </span>
     </th>
   )
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-3 border-b border-gray-100 flex items-center gap-3">
+      <div className="px-4 py-3.5 border-b border-gray-100 flex items-center gap-3">
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Cerca agenzia…"
-          className="w-64 border border-gray-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500" />
-        <span className="text-xs text-gray-400">{sorted.length} agenzie</span>
+          className="w-72 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors" />
+        <span className="text-sm text-gray-400">{sorted.length} agenzie</span>
       </div>
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-xs border-collapse">
+        <table className="w-full text-sm border-collapse">
           <thead className="bg-[#1F4E79] text-white sticky top-0 z-10">
             <tr>
               <Th field="agenzia"   label="Agenzia" />
@@ -83,13 +83,13 @@ export function ConfrontoTable() {
               const dCls = r.delta > 0 ? 'text-green-700 font-semibold' : r.delta < 0 ? 'text-red-600 font-semibold' : ''
               const pct = r.deltapct != null ? `${r.deltapct >= 0 ? '+' : ''}${r.deltapct.toFixed(1)}%` : 'N/D'
               return (
-                <tr key={r.agenzia} className={i % 2 === 0 ? 'bg-white' : 'bg-[#f7fafd]'}>
-                  <td className="px-3 py-1.5 font-medium max-w-[200px] truncate">{r.agenzia}</td>
-                  <td className="px-3 py-1.5 text-right">{fmtEur(r.incPrev)}</td>
-                  <td className="px-3 py-1.5 text-right font-semibold">{fmtEur(r.incCurr)}</td>
-                  <td className={`px-3 py-1.5 text-right ${dCls}`}>{r.delta >= 0 ? '+' : ''}{fmtEur(r.delta)}</td>
-                  <td className={`px-3 py-1.5 text-right ${dCls}`}>{pct}</td>
-                  <td className="px-3 py-1.5 text-right text-gray-500">{r.npratiche}</td>
+                <tr key={r.agenzia} className={i % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/60 hover:bg-slate-100/60'}>
+                  <td className="px-4 py-2.5 font-medium max-w-[200px] truncate">{r.agenzia}</td>
+                  <td className="px-4 py-2.5 text-right">{fmtEur(r.incPrev)}</td>
+                  <td className="px-4 py-2.5 text-right font-semibold">{fmtEur(r.incCurr)}</td>
+                  <td className={`px-4 py-2.5 text-right ${dCls}`}>{r.delta >= 0 ? '+' : ''}{fmtEur(r.delta)}</td>
+                  <td className={`px-4 py-2.5 text-right ${dCls}`}>{pct}</td>
+                  <td className="px-4 py-2.5 text-right text-gray-500">{r.npratiche}</td>
                 </tr>
               )
             })}

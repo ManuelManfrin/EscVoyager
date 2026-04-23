@@ -5,8 +5,8 @@ interface ChartCardProps { title: string; children: ReactNode; className?: strin
 
 export function ChartCard({ title, children, className = '' }: ChartCardProps) {
   return (
-    <Card className={`p-4 ${className}`}>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">{title}</h3>
+    <Card className={`p-5 ${className}`}>
+      <h3 className="text-sm font-medium text-gray-500 mb-4 shrink-0">{title}</h3>
       {children}
     </Card>
   )
